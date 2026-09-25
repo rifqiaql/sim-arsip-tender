@@ -121,11 +121,17 @@
         @else
         <div class="grid grid-cols-1 gap-6">
             @foreach($archives as $archive)
+            @php
+                // Deteksi nomor rak (1 s/d 5) untuk menampilkan gambar label pintu
+                preg_match('/\d+/', $archive->cabinet_name, $match);
+                $rakNum = $match[0] ?? '1';
+                $fotoRak = asset("images/lemari/rak-{$rakNum}.jpg");
+            @endphp
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:border-orange-300 transition duration-200">
                 <div class="p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
 
-                    <!-- Kolom Detail Dokumen (8 Cols) -->
-                    <div class="lg:col-span-8 space-y-2">
+                    <!-- Kolom Detail Dokumen (7 Cols) -->
+                    <div class="lg:col-span-7 space-y-2">
                         <div class="flex items-center space-x-2 flex-wrap gap-y-1">
                             <span class="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-blue-100 text-blue-800">
                                 {{ $archive->document_name ?? 'Dokumen Tender' }}
@@ -152,8 +158,8 @@
                         </div>
                     </div>
 
-                    <!-- Kolom Visualisasi Lokasi Fisik Rak (4 Cols) -->
-                    <div class="lg:col-span-4 bg-slate-50 border border-slate-200 rounded-lg p-3">
+                    <!-- Kolom Visualisasi Lokasi Fisik Rak (3 Cols) -->
+                    <div class="lg:col-span-3 bg-slate-50 border border-slate-200 rounded-lg p-3">
                         <div class="text-xs font-bold text-slate-700 mb-1 flex justify-between items-center">
                             <span><i class="fa-solid fa-location-dot text-red-500 mr-1"></i> POSISI RAK:</span>
                             <span class="text-orange-600 font-mono font-bold">{{ $archive->archive_code ?? '-' }}</span>
@@ -196,6 +202,22 @@
                         </div>
                     </div>
 
+                    <!-- Kolom Foto Fisik Label Pintu Rak (2 Cols) -->
+                    <div class="lg:col-span-2 flex flex-col items-center justify-center bg-slate-50 border border-slate-200 rounded-lg p-2 text-center">
+                        <span class="text-[10px] font-bold text-slate-600 mb-1.5 uppercase tracking-wider">
+                            <i class="fa-solid fa-camera text-slate-400 mr-1"></i> Label Fisik
+                        </span>
+                        
+                        <div class="relative group cursor-pointer overflow-hidden rounded border border-slate-300 shadow-sm bg-white" onclick="openPhotoModal('{{ $fotoRak }}', '{{ $archive->cabinet_name }}')">
+                            <img src="{{ $fotoRak }}" alt="Label {{ $archive->cabinet_name }}" class="w-24 h-24 object-cover group-hover:scale-105 transition duration-200" onerror="this.onerror=null; this.src='https://placehold.co/200x200?text=Foto+Rak';">
+                            <div class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 flex items-center justify-center transition duration-150">
+                                <i class="fa-solid fa-magnifying-glass-plus text-white text-sm"></i>
+                            </div>
+                        </div>
+                        
+                        <span class="text-[9px] text-slate-400 mt-1">Klik perbesar</span>
+                    </div>
+
                 </div>
             </div>
             @endforeach
@@ -207,6 +229,36 @@
         @endif
 
     </main>
+
+    <!-- Modal Popup Foto Penuh -->
+    <div id="photoModal" class="fixed inset-0 bg-black/75 z-50 hidden items-center justify-center p-4 backdrop-blur-sm" onclick="closePhotoModal()">
+        <div class="relative max-w-xl w-full bg-white rounded-xl overflow-hidden shadow-2xl p-2" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center p-3 border-b border-slate-200">
+                <h4 id="modalTitle" class="text-sm font-bold text-slate-800">Label Pintu Rak</h4>
+                <button type="button" onclick="closePhotoModal()" class="text-slate-400 hover:text-slate-600 text-lg font-bold px-2">&times;</button>
+            </div>
+            <div class="p-2 flex justify-center bg-slate-900 rounded-b-lg">
+                <img id="modalImg" src="" alt="Label Rak Fisik" class="max-h-[75vh] w-auto object-contain rounded">
+            </div>
+        </div>
+    </div>
+
+    <!-- Script Javascript Modal -->
+    <script>
+        function openPhotoModal(imgUrl, title) {
+            document.getElementById('modalImg').src = imgUrl;
+            document.getElementById('modalTitle').innerText = 'Foto Label Fisik: ' + title;
+            const modal = document.getElementById('photoModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closePhotoModal() {
+            const modal = document.getElementById('photoModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+    </script>
 
 </body>
 
